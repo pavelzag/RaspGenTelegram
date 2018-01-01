@@ -3,10 +3,10 @@ import requests
 import time
 from logger import logging_handler
 from send_mail import send_mail
-from configuration import get_telegram_token
+from configuration import get_config
 
 from_address = 'yardeni.generator.dev@gmail.com'
-TOKEN = get_telegram_token()
+TOKEN = get_config('creds', 'telegram_token')
 URL = "https://api.telegram.org/bot{}/".format(TOKEN)
 
 

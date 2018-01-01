@@ -1,10 +1,5 @@
 creds:
     email: me@gmail.com
     user: me
-    password: Pass
-    sleep_time: 5
-    owner: you@gmail.com
-white_list:
-    me@gmail.com, you@gmail.com
-telegram_token:
-    'xxx'
+    password: password
+    telegram_token: 'xxxxx
