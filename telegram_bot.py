@@ -4,10 +4,13 @@ import time
 from logger import logging_handler
 from send_mail import send_mail
 from configuration import get_config
+from dbconnector import get_gen_state
 
 from_address = 'yardeni.generator.dev@gmail.com'
 TOKEN = get_config('creds', 'telegram_token')
 URL = "https://api.telegram.org/bot{}/".format(TOKEN)
+telegram_success_msg = 'Message was received succesfully'
+telegram_failure_msg = 'Message was not received succesfully'
 
 
 def get_url(url):
@@ -50,6 +53,34 @@ def send_message(text, chat_id):
     get_url(url)
 
 
+def retry_db_status(i, db_status):
+    print('{} {}'.format('DB Status is ', db_status))
+    print('{} {}'.format('Attempt number ', i))
+    time.sleep(5)
+    return get_gen_state()
+
+
+def check_command_executed(command):
+    i = 1
+    db_status = get_gen_state()
+    if command == 'on':
+        while db_status != 'up' and i < 11:
+            db_status = retry_db_status(i, db_status)
+            i += 1
+        else:
+            print('{} {}'.format('DB Status is ', db_status))
+            return True
+    elif command == 'off':
+        while db_status != 'down' and i < 11:
+            db_status = retry_db_status(i, db_status)
+            i += 1
+        else:
+            print('{} {}'.format('DB Status is ', db_status))
+            return True
+    elif command == 'status':
+        return get_gen_state()
+
+
 def main():
     last_update_id = None
     while True:
@@ -61,6 +92,14 @@ def main():
             logging_handler(msg)
             send_mail(send_to=from_address, subject=command)
             send_message(msg, chat_id)
+            if command == 'status':
+                msg = ('{} {}'.format('Generator status is:', get_gen_state()))
+                send_message(msg, chat_id)
+            else:
+                if check_command_executed(command):
+                    send_message(telegram_success_msg, chat_id)
+                else:
+                    send_message(telegram_failure_msg, chat_id)
         time.sleep(0.5)
 
 
