@@ -94,7 +94,8 @@ def main():
                 send_message(msg, chat_id)
             else:
                 if check_command_executed(command):
-                    send_message(telegram_success_msg, chat_id)
+                    msg = '{} {} {}'.format(telegram_success_msg, 'Generator is', command)
+                    send_message(msg, chat_id)
                 else:
                     send_message(telegram_failure_msg, chat_id)
         time.sleep(0.5)
