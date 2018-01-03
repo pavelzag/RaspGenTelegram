@@ -33,7 +33,6 @@ def get_gen_state():
         return str(gen_state)
 
 
-
 def get_time_spent(month):
     """"Gets generator's time spent on in seconds"""
     time_sum_seconds =[]

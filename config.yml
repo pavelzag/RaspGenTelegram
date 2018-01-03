@@ -3,3 +3,7 @@ creds:
     user: me
     password: password
     telegram_token: 'xxxxx
+mongodb:
+    test_uri: 'test'
+    prod_uri: 'prod'
+    env: 'test'
