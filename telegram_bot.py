@@ -88,8 +88,6 @@ def main():
         if len(updates["result"]) > 0:
             last_update_id = get_last_update_id(updates) + 1
             command, chat_id = get_last_chat_id_and_text(updates)
-            msg = '{}{}{}'.format('The "', command, '" command was received')
-            logging_handler(msg)
             send_mail(send_to=from_address, subject=command)
             send_message(msg, chat_id)
             if command == 'status':
