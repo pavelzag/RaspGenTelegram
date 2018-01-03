@@ -4,7 +4,7 @@ import time
 from logger import logging_handler
 from send_mail import send_mail
 from configuration import get_config
-from dbconnector import get_gen_state
+from dbconnector import get_gen_state, get_last_time_spent
 
 from_address = 'yardeni.generator.dev@gmail.com'
 TOKEN = get_config('creds', 'telegram_token')
@@ -89,12 +89,16 @@ def main():
             last_update_id = get_last_update_id(updates) + 1
             command, chat_id = get_last_chat_id_and_text(updates)
             send_mail(send_to=from_address, subject=command)
+            time_spent = ' '.join(get_last_time_spent())
             if command == 'status':
                 msg = ('{} {}'.format('Generator status is:', get_gen_state()))
                 send_message(msg, chat_id)
             else:
                 if check_command_executed(command):
-                    msg = '{} {} {}'.format(telegram_success_msg, 'Generator is', command)
+                    if command == 'on':
+                        msg = '{} {} {}'.format(telegram_success_msg, 'Generator is', command)
+                    else:
+                        msg = '{} {} {} {} {}'.format(telegram_success_msg, 'Generator is', command, 'Generator was up for', time_spent)
                     send_message(msg, chat_id)
                 else:
                     send_message(telegram_failure_msg, chat_id)
