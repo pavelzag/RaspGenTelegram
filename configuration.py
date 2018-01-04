@@ -1,13 +1,13 @@
 import os.path
 import yaml
 
+if 'DYNO' in os.environ:
+    is_heroku = True
+else:
+    is_heroku = False
+
 
 def get_config(parameter_type, parameter_name):
-    if 'DYNO' in os.environ:
-        is_heroku = True
-    else:
-        is_heroku = False
-
     if is_heroku:
         return os.environ.get(parameter_name, 'Theres\'s nothing here')
     else:
@@ -18,11 +18,6 @@ def get_config(parameter_type, parameter_name):
 
 
 def get_db_creds(parameter_type, parameter_name):
-    if 'DYNO' in os.environ:
-        is_heroku = True
-    else:
-        is_heroku = False
-
     if is_heroku:
         return os.environ.get(parameter_name, 'Theres\'s nothing here')
     else:

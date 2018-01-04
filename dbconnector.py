@@ -46,7 +46,7 @@ def get_gen_state():
 
 def get_last_time_spent():
     # Some time out in order to get the latest record
-    time.sleep(5)
+    time.sleep(10)
     cursor = db.time_spent.find().sort([('time_stamp', -1)]).limit(1)
     for document in cursor:
         time_span = document['time_span']

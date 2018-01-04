@@ -1,8 +1,9 @@
 creds:
-    email: me@gmail.com
-    user: me
-    password: password
-    telegram_token: 'xxxxx
+    email: 'user@gmail.com'
+    user: 'user'
+    password: 'password'
+    telegram_token: 'token'
+    white_list: ''
 mongodb:
     test_uri: 'test'
     prod_uri: 'prod'
