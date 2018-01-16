@@ -1,10 +1,11 @@
 import datetime
 import json
 import requests
+from os import path
 import time
 from logger import logging_handler
 from send_mail import send_mail
-from configuration import get_config
+from configuration import get_config, get_cam_url
 from dbconnector import get_gen_state, get_last_time_spent
 
 from_address = 'yardeni.generator.dev@gmail.com'
@@ -13,12 +14,21 @@ white_list = get_config('creds', 'white_list')
 URL = "https://api.telegram.org/bot{}/".format(TOKEN)
 telegram_success_msg = 'Message was received succesfully.'
 telegram_failure_msg = 'Message was not received succesfully.'
+dir_path = path.dirname(path.realpath(__file__))
+image_file_path = path.join(dir_path, 'received_image.jpg')
 global interrupt
 interrupt = False
 
 
 def get_url(url):
     response = requests.get(url)
+    content = response.content.decode("utf8")
+    return content
+
+
+def post_url(url):
+    image_file = {'photo': open(image_file_path, 'rb')}
+    response = requests.post(url, files=image_file)
     content = response.content.decode("utf8")
     return content
 
@@ -57,11 +67,32 @@ def send_message(text, chat_id):
     get_url(url)
 
 
+def send_image(chat_id):
+    url = URL + "sendPhoto?&chat_id={}".format(chat_id)
+    logging_handler('Sending captured photo')
+    post_url(url)
+
+
 def retry_db_status(i, db_status):
     print('{} {}'.format('DB Status is ', db_status))
     print('{} {}'.format('Attempt number ', i))
     time.sleep(5)
     return get_gen_state()
+
+
+def pic_command():
+    """"Processes the Pic Command"""
+    url = get_cam_url('cam_url')
+    try:
+        r = requests.get(url)
+        with open(image_file_path, 'wb') as fout:
+            fout.write(r.content)
+        logging_handler('{} {}'.format(image_file_path, 'was saved successfully'))
+        msg = '{} {}'.format('Pic was saved to', image_file_path)
+        logging_handler(msg)
+    except:
+        msg = '{}'.format('Pic capture failed for some reason')
+        logging_handler(msg)
 
 
 def check_command_executed(key_command):
@@ -101,7 +132,7 @@ def wait_for_interrupt(run_time, interrupt):
         time_spent = ' '.join(get_last_time_spent())
         msg = '{} {} {}'.format(telegram_success_msg, 'Generator is going down. Generator was up for',
                                 time_spent)
-        send_message(msg, chat_id)
+        send_image(msg, chat_id)
     return interrupt
 
 
@@ -120,10 +151,12 @@ def main():
             elif str(chat_id) in white_list:
                 key_command = key_command.lower()
                 send_mail(send_to=from_address, subject=key_command)
-                # time_spent = ' '.join(get_last_time_spent())
                 if key_command == 'status':
                     msg = ('{} {}'.format('Generator status is:', get_gen_state()))
                     send_message(msg, chat_id)
+                elif key_command == 'pic':
+                    pic_command()
+                    send_image(chat_id)
                 else:
                     if check_command_executed(key_command):
                         if 'on' in key_command:
