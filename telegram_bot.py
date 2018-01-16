@@ -85,6 +85,7 @@ def pic_command():
     url = get_cam_url('cam_url')
     try:
         r = requests.get(url)
+        print(r.status_code)
         with open(image_file_path, 'wb') as fout:
             fout.write(r.content)
         logging_handler('{} {}'.format(image_file_path, 'was saved successfully'))
