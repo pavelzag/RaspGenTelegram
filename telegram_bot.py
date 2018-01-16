@@ -83,6 +83,7 @@ def retry_db_status(i, db_status):
 def pic_command():
     """"Processes the Pic Command"""
     url = get_cam_url('cam_url')
+    print('{} {}'.format('The camera URL is:', url))
     try:
         r = requests.get(url)
         print(r.status_code)
