@@ -8,7 +8,8 @@ from send_mail import send_mail
 from configuration import get_config, get_cam_url
 from dbconnector import get_gen_state, get_last_time_spent
 
-from_address = 'yardeni.generator.dev@gmail.com'
+api_email = get_config(parameter_type='creds', parameter_name='api_email')
+gen_email = get_config(parameter_type='creds', parameter_name='gen_email')
 TOKEN = get_config('creds', 'telegram_token')
 white_list = get_config('creds', 'white_list')
 URL = "https://api.telegram.org/bot{}/".format(TOKEN)
@@ -126,11 +127,11 @@ def wait_for_interrupt(run_time, interrupt):
         if len(updates["result"]) > 0:
             last_update_id = get_last_update_id(updates) + 1
             key_command, chat_id = get_last_chat_id_and_text(updates)
-            send_mail(send_to=from_address, subject=key_command)
+            send_mail(send_to=gen_email, subject=key_command)
             if key_command.lower() == 'off':
                 interrupt = True
     if not interrupt:
-        send_mail(send_to=from_address, subject='off')
+        send_mail(send_to=gen_email, subject='off')
         time_spent = ' '.join(get_last_time_spent())
         msg = '{} {} {}'.format(telegram_success_msg, 'Generator is going down. Generator was up for',
                                 time_spent)
@@ -152,7 +153,7 @@ def main():
                 send_message(msg, chat_id)
             elif str(chat_id) in white_list:
                 key_command = key_command.lower()
-                send_mail(send_to=from_address, subject=key_command)
+                send_mail(send_to=gen_email, subject=key_command)
                 if key_command == 'status':
                     msg = ('{} {}'.format('Generator status is:', get_gen_state()))
                     send_message(msg, chat_id)

@@ -7,8 +7,9 @@ from email.mime.text import MIMEText
 from email.utils import formatdate
 
 
-def send_mail(send_from = 'zagalsky@gmail.com', send_to='', subject='hi', text='', file=None,
-              server="smtp.gmail.com"):
+def send_mail(send_to='', subject='hi', text='', file=None,
+              server="smtp-mail.outlook.com"):
+    send_from = get_config(parameter_type='creds', parameter_name='api_email')
     msg = MIMEMultipart()
     msg['From'] = send_from
     msg['To'] = send_to
@@ -28,8 +29,7 @@ def send_mail(send_from = 'zagalsky@gmail.com', send_to='', subject='hi', text='
     smtp = smtplib.SMTP(server, 587)
     smtp.ehlo()
     smtp.starttls()
-    sender_email = get_config('creds','email')
     sender_password = get_config('creds', 'password')
-    smtp.login(sender_email, sender_password)
+    smtp.login(send_from, sender_password)
     smtp.sendmail(send_from, send_to, msg.as_string())
     smtp.close()

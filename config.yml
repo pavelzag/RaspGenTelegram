@@ -1,10 +1,13 @@
 creds:
-    email: 'user@gmail.com'
-    user: 'user'
-    password: 'password'
-    telegram_token: 'token'
-    white_list: ''
+    api_email: api@gmail.com
+    gen_email: gen@gmail.com
+    user: api.telegram
+    password: password
+    telegram_token: TOKEN
+    white_list: '12121'
 mongodb:
-    test_uri: 'test'
-    prod_uri: 'prod'
+    test_uri: 'mongodb://test'
+    prod_uri: 'mongodb://prod'
     env: 'test'
+cam_url:
+    'http://cam'
