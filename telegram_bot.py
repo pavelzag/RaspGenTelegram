@@ -148,6 +148,8 @@ def main():
         if len(updates["result"]) > 0:
             last_update_id = get_last_update_id(updates) + 1
             key_command, chat_id = get_last_chat_id_and_text(updates)
+            msg = '{} {}'.format('The command was received from', chat_id)
+            logging_handler(msg)
             if str(chat_id) not in white_list:
                 msg = 'You are not allowed'
                 send_message(msg, chat_id)
