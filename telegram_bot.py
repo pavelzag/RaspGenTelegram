@@ -63,6 +63,14 @@ def get_last_chat_id_and_text(updates):
     return text, chat_id
 
 
+def get_user_name(updates):
+    num_updates = len(updates["result"])
+    last_update = num_updates - 1
+    first_name = updates["result"][last_update]["message"]["from"]["first_name"]
+    last_name = updates["result"][last_update]["message"]["from"]["last_name"]
+    return first_name, last_name
+
+
 def send_message(text, chat_id):
     url = URL + "sendMessage?text={}&chat_id={}".format(text, chat_id)
     get_url(url)
@@ -75,8 +83,8 @@ def send_image(chat_id):
 
 
 def retry_db_status(i, db_status):
-    print('{} {}'.format('DB Status is ', db_status))
-    print('{} {}'.format('Attempt number ', i))
+    logging_handler('{} {}'.format('DB Status is ', db_status))
+    logging_handler('{} {}'.format('Attempt number ', i))
     time.sleep(5)
     return get_gen_state()
 
@@ -106,14 +114,14 @@ def check_command_executed(key_command):
             db_status = retry_db_status(i, db_status)
             i += 1
         else:
-            print('{} {}'.format('DB Status is ', db_status))
+            logging_handler('{} {}'.format('DB Status is ', db_status))
             return True
     elif key_command == 'off':
         while db_status != 'down' and i < 11:
             db_status = retry_db_status(i, db_status)
             i += 1
         else:
-            print('{} {}'.format('DB Status is ', db_status))
+            logging_handler('{} {}'.format('DB Status is ', db_status))
             return True
     elif key_command == 'status':
         return get_gen_state()
@@ -127,15 +135,19 @@ def wait_for_interrupt(run_time, interrupt):
         if len(updates["result"]) > 0:
             last_update_id = get_last_update_id(updates) + 1
             key_command, chat_id = get_last_chat_id_and_text(updates)
+            key_command = key_command.lower()
             if key_command == 'pic':
                 pic_command()
                 send_image(chat_id)
             elif key_command == 'status':
                 msg = ('{} {}'.format('Generator status is:', get_gen_state()))
                 send_message(msg, chat_id)
+            elif 'on' in key_command:
+                pass
             else:
+                pass
+            if key_command == 'off':
                 send_mail(send_to=gen_email, subject=key_command)
-            if key_command.lower() == 'off':
                 interrupt = True
     if not interrupt:
         send_mail(send_to=gen_email, subject='off')
@@ -148,18 +160,24 @@ def wait_for_interrupt(run_time, interrupt):
 
 def main():
     mail_sent = None
-    chat_id = None
     last_update_id = None
     while True:
         updates = get_updates(last_update_id)
         if len(updates["result"]) > 0:
             last_update_id = get_last_update_id(updates) + 1
             key_command, chat_id = get_last_chat_id_and_text(updates)
-            msg = '{} {}'.format('The command was received from', chat_id)
+            first_name, last_name = get_user_name(updates)
+            msg = '{} {}'.format('Last Update ID is:', last_update_id)
+            logging_handler(msg)
+            msg = '{} {} {} {} {}'.format('The command was received from id:', chat_id,
+                                          'user name:', first_name, last_name)
+            logging_handler(msg)
+            msg = '{} {}'.format('The command that was received was:', key_command)
             logging_handler(msg)
             if str(chat_id) not in white_list:
-                msg = 'You are not allowed'
+                msg = '{} {} {} {}'.format('User', first_name, last_name, 'is not allowed')
                 send_message(msg, chat_id)
+                logging_handler(msg)
             elif str(chat_id) in white_list:
                 key_command = key_command.lower()
                 if 'on' in key_command or 'off' in key_command:
@@ -188,7 +206,7 @@ def main():
                     else:
                         send_message(telegram_failure_msg, chat_id)
                 if any(char.isdigit() for char in key_command):
-                    timeout_frame = int(key_command.split("on", 1)[1])
+                    timeout_frame = int(key_command.split('on', 1)[1])
                     interrupt_flag = wait_for_interrupt(timeout_frame, interrupt)
                     if interrupt_flag:
                         time_spent = ' '.join(get_last_time_spent())
