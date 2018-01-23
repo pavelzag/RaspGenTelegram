@@ -166,16 +166,15 @@ def main():
         if len(updates["result"]) > 0:
             last_update_id = get_last_update_id(updates) + 1
             key_command, chat_id = get_last_chat_id_and_text(updates)
-            first_name, last_name = get_user_name(updates)
+            # first_name, last_name = get_user_name(updates)
             msg = '{} {}'.format('Last Update ID is:', last_update_id)
             logging_handler(msg)
-            msg = '{} {} {} {} {}'.format('The command was received from id:', chat_id,
-                                          'user name:', first_name, last_name)
+            msg = '{} {}'.format('The command was received from id:', chat_id)
             logging_handler(msg)
             msg = '{} {}'.format('The command that was received was:', key_command)
             logging_handler(msg)
             if str(chat_id) not in white_list:
-                msg = '{} {} {} {}'.format('User', first_name, last_name, 'is not allowed')
+                msg = '{}'.format('User is not allowed')
                 send_message(msg, chat_id)
                 logging_handler(msg)
             elif str(chat_id) in white_list:
