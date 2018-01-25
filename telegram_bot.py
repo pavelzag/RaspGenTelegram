@@ -58,7 +58,10 @@ def get_last_update_id(updates):
 def get_last_chat_id_and_text(updates):
     num_updates = len(updates["result"])
     last_update = num_updates - 1
-    text = updates["result"][last_update]["message"]["text"]
+    try:
+        text = updates["result"][last_update]["message"]["text"]
+    except:
+        text = 'Error. There\'s no text in this message'
     chat_id = updates["result"][last_update]["message"]["chat"]["id"]
     return text, chat_id
 
@@ -174,7 +177,7 @@ def main():
             msg = '{} {}'.format('The command that was received was:', key_command)
             logging_handler(msg)
             if str(chat_id) not in white_list:
-                msg = '{}'.format('User is not allowed')
+                msg = '{} {}'.format(chat_id, 'User is not allowed')
                 send_message(msg, chat_id)
                 logging_handler(msg)
             elif str(chat_id) in white_list:
